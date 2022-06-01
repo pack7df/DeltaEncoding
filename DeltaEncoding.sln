@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rsync", "rsync", "{660ADDE3-AF18-424D-A903-67CC4EB45051}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Client", "DeltaEncoding.RSync.Client\DeltaEncoding.RSync.Client.csproj", "{359CC42A-9FFC-4278-B229-56B45A9E9233}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Server", "DeltaEncoding.RSync.Server\DeltaEncoding.RSync.Server.csproj", "{536FF86A-6215-4AB4-A796-23D804BB7951}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Shared", "DeltaEncoding.RSync.Shared\DeltaEncoding.RSync.Shared.csproj", "{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Test", "DeltaEncoding.RSync.Test\DeltaEncoding.RSync.Test.csproj", "{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{359CC42A-9FFC-4278-B229-56B45A9E9233}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{359CC42A-9FFC-4278-B229-56B45A9E9233}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{359CC42A-9FFC-4278-B229-56B45A9E9233}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{359CC42A-9FFC-4278-B229-56B45A9E9233}.Release|Any CPU.Build.0 = Release|Any CPU
+		{536FF86A-6215-4AB4-A796-23D804BB7951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{536FF86A-6215-4AB4-A796-23D804BB7951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{536FF86A-6215-4AB4-A796-23D804BB7951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{536FF86A-6215-4AB4-A796-23D804BB7951}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{359CC42A-9FFC-4278-B229-56B45A9E9233} = {660ADDE3-AF18-424D-A903-67CC4EB45051}
+		{536FF86A-6215-4AB4-A796-23D804BB7951} = {660ADDE3-AF18-424D-A903-67CC4EB45051}
+		{5CEB48DD-7CCB-45D6-9ECE-DB324AE6B228} = {660ADDE3-AF18-424D-A903-67CC4EB45051}
+		{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463} = {660ADDE3-AF18-424D-A903-67CC4EB45051}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F50EC00-03C0-4BEF-80CB-06B3C53CC33D}
+	EndGlobalSection
+EndGlobal
