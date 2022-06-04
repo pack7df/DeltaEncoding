@@ -97,16 +97,6 @@ namespace DeltaEncoding.RSync.Server
             }
         }
 
-        private void WriteBlocks2(Stream targetStream, Stream secondary)
-        {
-            foreach (var o in delta.Patchs)
-            {
-                if (o.Size == 0) continue;
-                targetStream.Seek(o.Start, SeekOrigin.Begin);
-                targetStream.Copy(secondary, o.Size);
-            }
-        }
-
         private void FillDeltaOperations(Stream targetStream)
         {
             var weakHashAlgorithm = new Addler32Hash(delta.BlockSize);
@@ -140,15 +130,28 @@ namespace DeltaEncoding.RSync.Server
             ProcessEndFile();
         }
 
-        public void CreatePatch(Stream signaturesStream, Stream targetStream, Stream patchStream)
+        private void CompressPatch(Stream temporalStream, Stream patchStream)
+        {
+            temporalStream.Seek(0, SeekOrigin.Begin);
+            
+            foreach (var b in temporalStream.GetBytes())
+            {
+
+            }
+        }
+
+        public void CreatePatch(Stream signaturesStream, Stream targetStream, Stream patchStream, Stream temporalStream = null)
         {
             InitializeChunksDictionary(signaturesStream);
             FillDeltaOperations(targetStream);
             FillChecksum(targetStream);
-            patchStream.Write(delta);
-            WriteNonMachedBlocks(targetStream,patchStream);
+            var nonCompressedDeltaStream = patchStream;
+            if (temporalStream != null)
+                nonCompressedDeltaStream = temporalStream;
+            nonCompressedDeltaStream.Write(delta);
+            WriteNonMachedBlocks(targetStream, nonCompressedDeltaStream);
+            if (temporalStream!=null)
+                CompressPatch(nonCompressedDeltaStream, patchStream);
         }
-
-
     }
 }

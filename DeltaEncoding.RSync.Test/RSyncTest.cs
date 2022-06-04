@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DeltaEncoding.RSync.Test
 {
-    public class UnitTest1
+    public class RSyncTest
     {
         [Fact]
         public void Test1()

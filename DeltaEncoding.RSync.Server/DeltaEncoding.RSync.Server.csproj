@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RT.ArithmeticCoding" Version="1.1.64" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DeltaEncoding.RSync.Shared\DeltaEncoding.RSync.Shared.csproj" />
   </ItemGroup>
 

@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Shared"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeltaEncoding.RSync.Test", "DeltaEncoding.RSync.Test\DeltaEncoding.RSync.Test.csproj", "{D7C633AE-7C8C-40F1-8E2F-DD1C14DA8463}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Prototype", "Prototype", "{F8DC358A-FC18-4922-A401-E06B7B762638}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
