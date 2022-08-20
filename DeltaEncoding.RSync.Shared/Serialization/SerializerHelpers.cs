@@ -60,5 +60,7 @@ namespace DeltaEncoding.RSync.Shared.Serialization
                 targetStream.Write(buffer, 0, read);
             }
         }
+
+        
     }
 }

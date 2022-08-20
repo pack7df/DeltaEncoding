@@ -2,9 +2,13 @@
 
 namespace DeltaEncoding.RSync.Client
 {
+    public interface IRsyncClientFileUpdater
+    {
+        bool GetUpdate(Stream patch, Stream update);
+    }
+
     public interface IRSyncClient
     {
-        void CreateSignatures(Stream input, Stream output);
-        bool Patch(Stream deltaStream, Stream originalStream, Stream outputStream);
+        IRsyncClientFileUpdater GetSignatures(Stream original, Stream signatures);
     }
 }

@@ -2,8 +2,22 @@
 
 namespace DeltaEncoding.RSync.Server
 {
+
+
+    public interface IRsyncServerFileMetaPatch
+    {
+        void GeneratePatch(Stream output);
+    }
+
+    public interface IRsyncServerFileSignatured
+    {
+        IRsyncServerFileMetaPatch GenerateMetaPatch(Stream originalStream);
+    }
+
+    
+
     public interface IRSyncServer
     {
-        void CreatePatch(Stream signatures, Stream targetStream, Stream delta, Stream compressStream = null);
+        IRsyncServerFileSignatured ReadClientFileSignature(Stream signatures);
     }
 }

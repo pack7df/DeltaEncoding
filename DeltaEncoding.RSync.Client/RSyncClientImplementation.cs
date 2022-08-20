@@ -29,7 +29,7 @@ namespace DeltaEncoding.RSync.Client
             this.BlockSize = blockSize;
         }
 
-        public void CreateSignatures(Stream input, Stream output)
+        public IRsyncClientFileUpdater GetSignatures(Stream original, Stream signatures)
         {
             var weakHashCalculator = new Addler32Hash(this.BlockSize);
             var strongHashCalculator = HashAlgorithm.Create(this.StrongHashAlgorithmName);
@@ -40,7 +40,7 @@ namespace DeltaEncoding.RSync.Client
             };
             var chunks = signature.Chunks;
             int offset = 0;
-            foreach(var b in input.GetBytes())
+            foreach(var b in original.GetBytes())
             {
                 var weakSignature = weakHashCalculator.Push(b);
                 offset = (offset+1)%BlockSize;
@@ -48,58 +48,8 @@ namespace DeltaEncoding.RSync.Client
                 var strongSignature = strongHashCalculator.ComputeHash(weakHashCalculator.Content);
                 chunks.Add(new BlockSignatureInfo(weakSignature, strongSignature));
             }
-            output.Write(signature);
-        }
-
-        private bool CheckChecksum(Stream output, PatchInfo info)
-        {
-            var strongHashAlgorithmName = info.StrongHashAlgorithmName;
-            var algorithm = HashAlgorithm.Create(strongHashAlgorithmName);
-            output.Seek(0, SeekOrigin.Begin);
-            var md5 = algorithm.ComputeHash(output);
-            return (md5.SequenceEqual(info.CheckSum));
-        }
-
-        private PatchInfo ReadPatchInfo(Stream patchStream)
-        {
-            var reader = new BinaryReader(patchStream);
-            var blockSize = reader.ReadUInt16();
-            var strongHashAlgorithmName = reader.ReadString();
-            var algorithm = HashAlgorithm.Create(strongHashAlgorithmName);
-            var checkSum = reader.ReadBytes(algorithm.HashSize / 8);
-            var count = reader.ReadInt32();
-            var result = new PatchInfo
-            {
-                BlockSize = blockSize,
-                StrongHashAlgorithmName = strongHashAlgorithmName,
-                CheckSum = checkSum
-            };
-            for (var i = 0; i < count; i++)
-            {
-                var deltaBlock = new DeltaPatchInfo
-                {
-                    BlockIndex = reader.ReadInt32(),
-                    Size = reader.ReadInt32(),
-                };
-                result.Patchs.Add(deltaBlock);
-            }
-            return result;
-        }
-
-        public bool Patch(Stream patchStream, Stream originalStream, Stream outputStream)
-        {
-            var patchInfo = ReadPatchInfo(patchStream);
-            foreach(var o in patchInfo.Patchs)
-            {
-                var blockIndex = o.BlockIndex;
-                var size = o.Size;
-                patchStream.Copy(outputStream, size);
-                if (o.BlockIndex < 0) continue;
-                var position = blockIndex * patchInfo.BlockSize;
-                originalStream.Seek(position, SeekOrigin.Begin);
-                originalStream.Copy(outputStream, patchInfo.BlockSize);
-            }
-            return CheckChecksum(outputStream, patchInfo);
+            signatures.Write(signature);
+            return new RSyncClientFileUpdaterImpl(original);
         }
     }
 }

@@ -11,22 +11,39 @@ namespace DeltaEncoding.RSync.Test
         [Fact]
         public void Test1()
         {
-            var stream1 = new FileStream("./samples/d1.dll", FileMode.Open);
-            var stream2 = new FileStream("./samples/d2.dll", FileMode.Open);
+            //Client file version to update.
+            var clientVersion = new FileStream("./samples/d1.dll", FileMode.Open);
+            //Server file version. 
+            var serverVersion = new FileStream("./samples/d2.dll", FileMode.Open);
+
             var client = new RSyncClientImplementation();
             var server = new RSyncServerImplementation();
-            var q = 733;
+            //var q = 733;
             //var l = (int)Math.Sqrt(((double)stream1.Length/(double)q)*28.0d);
-            var l= 2048;
+            //var l= 2048;
+            //Client signatures to send to server.
             var signaturesStream = new MemoryStream();
+            //Patch stream from server to client.
             var patchStream = new MemoryStream();
+            //Result stream in client to overwrite.
             var resultStream = new MemoryStream();
-            client.CreateSignatures(stream1, signaturesStream);
+
+            //Generate signatures and create a client file receiver.
+            var fileReceiver = client.GetSignatures(clientVersion, signaturesStream);
+
+            //Reset signatures stream to be used in server.
             signaturesStream.Seek(0, SeekOrigin.Begin);
-            server.CreatePatch(signaturesStream, stream2, patchStream);
+
+            //Read signatures in server.
+            var serverFileSignatures = server.ReadClientFileSignature(signaturesStream);
+            //Generate meta patch information in server and Patch information.
+            serverFileSignatures.GenerateMetaPatch(serverVersion).GeneratePatch(patchStream);
+            //Reset patch stream and client version to be used in client.
             patchStream.Seek(0, SeekOrigin.Begin);
-            stream1.Seek(0, SeekOrigin.Begin);
-            var equals = client.Patch(patchStream, stream1, resultStream);
+            clientVersion.Seek(0, SeekOrigin.Begin);
+
+            //Update the client with patch stream.
+            var equals = fileReceiver.GetUpdate(patchStream, resultStream);
             Assert.True(equals);
         }
     }
