@@ -60,7 +60,7 @@ namespace DeltaEncoding.RSync.Client
             return (md5.SequenceEqual(info.CheckSum));
         }
 
-        public PatchInfo ReadPatchInfo(this Stream patchStream)
+        private PatchInfo ReadPatchInfo(Stream patchStream)
         {
             var reader = new BinaryReader(patchStream);
             var blockSize = reader.ReadUInt16();
