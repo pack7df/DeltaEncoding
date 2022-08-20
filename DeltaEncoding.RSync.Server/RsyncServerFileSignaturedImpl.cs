@@ -10,12 +10,13 @@ using System.Text;
 
 namespace DeltaEncoding.RSync.Server
 {
-    public class RsyncServerFileSignaturedImpl : IRsyncServerFileSignatured
+    public class RsyncServerFileSignaturedImpl : IRsyncServerFileSignatured, IRsyncServerFileMetaPatch
     {
         private PatchInfo patch;
         private IDictionary<uint, List<ChunkInfo>> chunks;
         private int basePosition;
         private int slidePosition;
+        private Stream originalStream;
         
 
         public RsyncServerFileSignaturedImpl(PatchInfo patch, IDictionary<uint, List<ChunkInfo>> chunks)
@@ -48,6 +49,7 @@ namespace DeltaEncoding.RSync.Server
 
         public IRsyncServerFileMetaPatch GenerateMetaPatch(Stream originalStream)
         {
+            this.originalStream = originalStream;
             var weakHashAlgorithm = new Addler32Hash(patch.BlockSize);
             var md5 = HashAlgorithm.Create("MD5");
             var algorithm = HashAlgorithm.Create(this.patch.StrongHashAlgorithmName);
@@ -91,7 +93,18 @@ namespace DeltaEncoding.RSync.Server
             md5.TransformFinalBlock(md5Buffer, 0, md5Load);
             patch.CheckSum = md5.Hash;
             ProcessEndFile();
-            return new RsyncServerFileMetaPatchImpl(patch, originalStream);
+            return this;
+        }
+
+        public void GeneratePatch(Stream output)
+        {
+            output.Write(patch);
+            foreach (var o in patch.Patchs)
+            {
+                if (o.Size == 0) continue;
+                originalStream.Seek(o.Start, SeekOrigin.Begin);
+                originalStream.Copy(output, o.Size);
+            }
         }
     }
 }
