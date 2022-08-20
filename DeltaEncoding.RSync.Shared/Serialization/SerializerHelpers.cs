@@ -60,53 +60,5 @@ namespace DeltaEncoding.RSync.Shared.Serialization
                 targetStream.Write(buffer, 0, read);
             }
         }
-
-        public static PatchInfo ReadPatchInfo(this Stream deltaStream)
-        {
-            var reader = new BinaryReader(deltaStream);
-            var blockSize = reader.ReadUInt16();
-            var strongHashAlgorithmName = reader.ReadString();
-            var algorithm = HashAlgorithm.Create(strongHashAlgorithmName);
-            var checkSum = reader.ReadBytes(algorithm.HashSize/8);
-            var count = reader.ReadInt32();
-            var result = new PatchInfo
-            {
-                BlockSize = blockSize,
-                StrongHashAlgorithmName = strongHashAlgorithmName,
-                CheckSum = checkSum
-            };
-            for (var i=0; i<count; i++)
-            {
-                var deltaBlock = new DeltaPatchInfo
-                {
-                    BlockIndex = reader.ReadInt32(),
-                    Size = reader.ReadInt32(),
-                };
-                result.Patchs.Add(deltaBlock);
-            }
-            return result;
-        }
-
-        public static SignatureInfo ReadSignatureInfo(this Stream stream)
-        {
-            using var reader = new BinaryReader(stream);
-            var blockSize = reader.ReadUInt16();
-            var strongHashAlgorithmName = reader.ReadString();
-            var result = new SignatureInfo
-            {
-                BlockSize = blockSize,
-                StrongHashAlgorithmName = strongHashAlgorithmName,
-            };
-            var algorithm = HashAlgorithm.Create(result.StrongHashAlgorithmName);
-            var size = stream.Length;
-            while (reader.BaseStream.Position < size)
-            {
-                var weak = reader.ReadUInt32();
-                var strong = reader.ReadBytes(algorithm.HashSize/8);
-                var chunck = new BlockSignatureInfo(weak, strong);
-                result.Chunks.Add(chunck);
-            }
-            return result;
-        }
     }
 }

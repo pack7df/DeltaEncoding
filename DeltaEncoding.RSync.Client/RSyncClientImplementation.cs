@@ -23,11 +23,6 @@ namespace DeltaEncoding.RSync.Client
             get;set;
         }
 
-        public long MaxSignatureSize
-        {
-            get; set;
-        } = 6 * 1024l * 1024l * 1024l;
-
         public RSyncClientImplementation(ushort blockSize = 1024, String strongHashAlgorithmName = "MD5")
         {
             this.StrongHashAlgorithmName = strongHashAlgorithmName;
@@ -48,9 +43,7 @@ namespace DeltaEncoding.RSync.Client
             foreach(var b in input.GetBytes())
             {
                 var weakSignature = weakHashCalculator.Push(b);
-                offset++;
-                if (offset == BlockSize)
-                    offset = 0;
+                offset = (offset+1)%BlockSize;
                 if (offset != 0) continue;
                 var strongSignature = strongHashCalculator.ComputeHash(weakHashCalculator.Content);
                 chunks.Add(new BlockSignatureInfo(weakSignature, strongSignature));
@@ -67,9 +60,35 @@ namespace DeltaEncoding.RSync.Client
             return (md5.SequenceEqual(info.CheckSum));
         }
 
+        public PatchInfo ReadPatchInfo(this Stream patchStream)
+        {
+            var reader = new BinaryReader(patchStream);
+            var blockSize = reader.ReadUInt16();
+            var strongHashAlgorithmName = reader.ReadString();
+            var algorithm = HashAlgorithm.Create(strongHashAlgorithmName);
+            var checkSum = reader.ReadBytes(algorithm.HashSize / 8);
+            var count = reader.ReadInt32();
+            var result = new PatchInfo
+            {
+                BlockSize = blockSize,
+                StrongHashAlgorithmName = strongHashAlgorithmName,
+                CheckSum = checkSum
+            };
+            for (var i = 0; i < count; i++)
+            {
+                var deltaBlock = new DeltaPatchInfo
+                {
+                    BlockIndex = reader.ReadInt32(),
+                    Size = reader.ReadInt32(),
+                };
+                result.Patchs.Add(deltaBlock);
+            }
+            return result;
+        }
+
         public bool Patch(Stream patchStream, Stream originalStream, Stream outputStream)
         {
-            var patchInfo = patchStream.ReadPatchInfo();
+            var patchInfo = ReadPatchInfo(patchStream);
             foreach(var o in patchInfo.Patchs)
             {
                 var blockIndex = o.BlockIndex;
