@@ -18,16 +18,6 @@ namespace DeltaEncoding.RSync.Test
             var stream1 = new FileStream("./samples/d1.dll", FileMode.Open);
             var dictionary = new Dictionary<byte, List<long>>();
             var pos = 0;
-            foreach(var b in stream1.GetBytes())
-            {
-                if (!(dictionary.TryGetValue(b, out var list)))
-                {
-                    list = new List<long>();
-                    dictionary[b] = list;
-                }
-                list.Add(pos);
-                pos++;
-            }
             foreach(var kv in dictionary)
             {
                 var x  = Enumerable.Range(0,kv.Value.Count).Select(v => (double)v).ToArray();

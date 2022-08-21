@@ -9,19 +9,6 @@ namespace DeltaEncoding.RSync.Shared.Serialization
     public static class SerializerHelper
     {
 
-        public static IEnumerable<byte> GetBytes(this Stream stream)
-        {
-            var buffer = new byte[256 * 2014 * 1024];
-            int readBytes;
-            do
-            {
-                readBytes = stream.Read(buffer);
-                for (var i = 0; i < readBytes; i++)
-                    yield return buffer[i];
-            }
-            while (readBytes > 0);
-        }
-
         public static void Write(this Stream stream, SignatureInfo signature)
         {
             var writer = new BinaryWriter(stream);
