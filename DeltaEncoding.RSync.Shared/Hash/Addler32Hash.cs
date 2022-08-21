@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace DeltaEncoding.RSync.Shared.Hash
@@ -23,7 +24,6 @@ namespace DeltaEncoding.RSync.Shared.Hash
             buffer = new byte[2 * blockSize];
             for (var i = 0; i < buffer.Length; i++)
                 buffer[i] = 0;
-
         }
 
         public Addler32Hash(ushort blockSize=128)
@@ -58,6 +58,30 @@ namespace DeltaEncoding.RSync.Shared.Hash
             Start(bs);
         }
 
+        public byte[] GetHash(HashAlgorithm algoritm)
+        {
+            return algoritm.ComputeHash(buffer, start, blockSize);
+        }
+
+        public uint GetWeakCode(byte[] bytes)
+        {
+            var a = 0;
+            var b = 0;
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                var z = bytes[i];
+                a = (z + a) % m;
+                b = (b + a) % m;
+                buffer[i] = z;
+                buffer[i + blockSize] = z;
+            }
+            r1 = a;
+            r2 = b;
+            start = 0;
+            return (uint)((b << 16) | a);
+        }
+
+        /*
         public byte[] Content {
             get
             {
@@ -66,6 +90,7 @@ namespace DeltaEncoding.RSync.Shared.Hash
                 return result;
             }
         }
+        */
 
         public int Size
         {

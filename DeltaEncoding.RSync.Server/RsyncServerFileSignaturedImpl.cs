@@ -29,7 +29,7 @@ namespace DeltaEncoding.RSync.Server
         {
             var start = basePosition;
             var end = basePosition + slidePosition;
-            if (end < start) return;
+            if (end <= start) return;
             var delta = new DeltaPatchInfo
             {
                 BlockIndex = -1,
@@ -55,55 +55,64 @@ namespace DeltaEncoding.RSync.Server
             var algorithm = HashAlgorithm.Create(this.patch.StrongHashAlgorithmName);
             md5.Initialize();
             basePosition = 0;
-            var rollLoading = 0l;
             slidePosition = 0;
-            var md5Buffer = new byte[1024];
-            var md5Load = 0;
-            foreach (var b in originalStream.GetBytes())
+            var buffer = new byte[patch.BlockSize];
+            while (true)
             {
-                md5Buffer[md5Load] = b;
-                md5Load++;
-                if (md5Load == md5Buffer.Length)
+                var read = originalStream.Read(buffer, 0, buffer.Length);
+                slidePosition+= read;
+                if (read<buffer.Length)
+                    break;
+                var weakSignature = weakHashAlgorithm.GetWeakCode(buffer);
+                while (true)
                 {
-                    md5Load = 0;
-                    md5.TransformBlock(md5Buffer, 0, md5Buffer.Length, md5Buffer, 0);
+                    if (chunks.ContainsKey(weakSignature))
+                    {
+                        var strongSignature = weakHashAlgorithm.GetHash(algorithm);
+                        var index = getIndex(weakSignature, strongSignature);
+                        if (index != -1)
+                        {
+                            var deltaPatch = new DeltaPatchInfo
+                            {
+                                BlockIndex = index,
+                                Start = basePosition,
+                                Size = slidePosition - patch.BlockSize,
+                            };
+                            basePosition += slidePosition;
+                            slidePosition = 0;
+                            this.patch.Patchs.Add(deltaPatch);
+                            break;
+                        }
+                    }
+                    var b = originalStream.ReadByte();
+                    if (b == -1)
+                        break;
+                    weakSignature = weakHashAlgorithm.Push((byte)b);
+                    slidePosition++;
                 }
-                var weakSignature = weakHashAlgorithm.Push(b);
-                slidePosition++;
-                rollLoading++;
-                if (rollLoading < patch.BlockSize)
-                    continue;
-                if (!chunks.ContainsKey(weakSignature))
-                    continue;
-                var strongSignature = algorithm.ComputeHash(weakHashAlgorithm.Content);
-                var index = getIndex(weakSignature, strongSignature);
-                if (index == -1)
-                    continue;
-                var deltaPatch = new DeltaPatchInfo
-                {
-                    BlockIndex = index,
-                    Start = basePosition,
-                    Size = slidePosition - patch.BlockSize,
-                };
-                rollLoading = 0;
-                basePosition += slidePosition;
-                slidePosition = 0;
-                this.patch.Patchs.Add(deltaPatch);
             }
-            md5.TransformFinalBlock(md5Buffer, 0, md5Load);
-            patch.CheckSum = md5.Hash;
             ProcessEndFile();
+            originalStream.Seek(0, SeekOrigin.Begin);
+            var hash = md5.ComputeHash(originalStream);
+            patch.CheckSum = hash;
             return this;
         }
 
         public void GeneratePatch(Stream output)
         {
             output.Write(patch);
+            var buffer = new byte[4 * 1020 * 1024];
             foreach (var o in patch.Patchs)
             {
                 if (o.Size == 0) continue;
                 originalStream.Seek(o.Start, SeekOrigin.Begin);
-                originalStream.Copy(output, o.Size);
+                var size = o.Size;
+                while (size > 0)
+                {
+                    var read = originalStream.Read(buffer, 0, Math.Min(buffer.Length, size));
+                    size -= read;
+                    output.Write(buffer, 0, read);
+                }
             }
         }
     }

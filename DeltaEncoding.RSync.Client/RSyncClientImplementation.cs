@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DeltaEncoding.RSync.Client
 {
@@ -39,13 +40,11 @@ namespace DeltaEncoding.RSync.Client
                 StrongHashAlgorithmName = this.StrongHashAlgorithmName,
             };
             var chunks = signature.Chunks;
-            int offset = 0;
-            foreach(var b in original.GetBytes())
+            var block = new byte[BlockSize];
+            while (original.Read(block, 0, block.Length) == block.Length)
             {
-                var weakSignature = weakHashCalculator.Push(b);
-                offset = (offset+1)%BlockSize;
-                if (offset != 0) continue;
-                var strongSignature = strongHashCalculator.ComputeHash(weakHashCalculator.Content);
+                var weakSignature = weakHashCalculator.GetWeakCode(block);
+                var strongSignature = strongHashCalculator.ComputeHash(block);
                 chunks.Add(new BlockSignatureInfo(weakSignature, strongSignature));
             }
             signatures.Write(signature);

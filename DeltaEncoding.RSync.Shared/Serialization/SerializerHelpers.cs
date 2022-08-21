@@ -11,7 +11,7 @@ namespace DeltaEncoding.RSync.Shared.Serialization
 
         public static IEnumerable<byte> GetBytes(this Stream stream)
         {
-            var buffer = new byte[4 * 2014 * 1024];
+            var buffer = new byte[256 * 2014 * 1024];
             int readBytes;
             do
             {
@@ -48,19 +48,5 @@ namespace DeltaEncoding.RSync.Shared.Serialization
                 writer.Write(o.Size);
             }
         }
-
-        public static void Copy(this Stream sourceStream, Stream targetStream, int size)
-        {
-            if (size <= 0) return;
-            var buffer = new byte[4 * 1020 * 1024];
-            while (size > 0)
-            {
-                var read = sourceStream.Read(buffer, 0, Math.Min(buffer.Length,size));
-                size -= read;
-                targetStream.Write(buffer, 0, read);
-            }
-        }
-
-        
     }
 }
