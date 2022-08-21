@@ -65,6 +65,9 @@ namespace DeltaEncoding.RSync.Test
                 fileReceiver = client.GetSignatures(clientVersion, signaturesStream);
             }, "Generating signatures");
 
+            var signaturesLength = signaturesStream.Length;
+            Debug.WriteLine($"Bytes sent from client to server: {signaturesLength} \n");
+
             //Reset signatures stream to be used in server.
             signaturesStream.Seek(0, SeekOrigin.Begin);
 
@@ -83,6 +86,11 @@ namespace DeltaEncoding.RSync.Test
                 metaPach.GeneratePatch(patchStream);
             }, "Generating patches");
 
+            Debug.WriteLine($"Bytes sent from server to client: {patchStream.Length} \n");
+
+            Debug.WriteLine($"Total bytes sent/received in client: {patchStream.Length + signaturesLength} \n");
+            Debug.WriteLine($"Bytes sent/received ratio: {((double)(patchStream.Length + signaturesLength) / (double)serverVersion.Length) * 100.0}% \n");
+
             //Reset patch stream and client version to be used in client.
             patchStream.Seek(0, SeekOrigin.Begin);
             clientVersion.Seek(0, SeekOrigin.Begin);
@@ -92,6 +100,8 @@ namespace DeltaEncoding.RSync.Test
             var patchOperation = RunWithStatistics(() => {
                 equals = fileReceiver.GetUpdate(patchStream, resultStream);
             }, "Generating file update and check integrity");
+            resultStream.Flush();
+            resultStream.Close();
             Assert.True(equals);
             var total = signaturesGeneration + signaturesPreparation + metaPatchGeneration + patchGeneration + patchOperation;
             var clientTotal = signaturesGeneration + patchOperation;

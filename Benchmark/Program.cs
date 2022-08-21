@@ -38,6 +38,7 @@ var signaturesGeneration = RunWithStatistics(() => {
     fileReceiver = client.GetSignatures(clientVersion, signaturesStream);
 }, "Generating signatures");
 
+Debug.WriteLine($"Bytes sent from client to server: {signaturesStream.Length} \n");
 //Reset signatures stream to be used in server.
 signaturesStream.Seek(0, SeekOrigin.Begin);
 
@@ -55,6 +56,11 @@ var metaPatchGeneration = RunWithStatistics(() => {
 var patchGeneration = RunWithStatistics(() => {
     metaPach.GeneratePatch(patchStream);
 }, "Generating patches");
+
+Debug.WriteLine($"Bytes sent from server to client: {patchStream.Length} \n");
+
+Debug.WriteLine($"Total bytes sent/received in client: {patchStream.Length + signaturesStream.Length} \n");
+Debug.WriteLine($"Bytes sent/received ratio: {((patchStream.Length + signaturesStream.Length)/serverVersion.Length)*100}% \n");
 
 //Reset patch stream and client version to be used in client.
 patchStream.Seek(0, SeekOrigin.Begin);
